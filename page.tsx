@@ -39,15 +39,15 @@ const TrendIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
 
 // 상수
 const POPULAR_PRODUCTS = [
-  { id: 1, name: "글램핑" },
-  { id: 2, name: "떡볶이" },
-  { id: 3, name: "캠핑용품" },
-  { id: 4, name: "에어프라이어" },
-  { id: 5, name: "무선청소기" },
+  { id: 1, name: "인기검색어1" },
+  { id: 2, name: "인기검색어2" },
+  { id: 3, name: "인기검색어3" },
+  { id: 4, name: "인기검색어4" },
+  { id: 5, name: "인기검색어5" },
 ];
 
 const PROGRESS_STEPS = [
-  { label: "검색 시작", time: "10:30:15" },
+  { label: "검색 시작"},
   { label: "결과 수집 중...", subLabel: "블로그, 카페, sns 등" },
   { label: "데이터 분석 중..." },
   { label: "결과 저장 중..." },
