@@ -37,6 +37,14 @@ const TrendIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
+const QuestionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <path d="M12 17h.01" />
+  </svg>
+);
+
 // 상수
 const POPULAR_PRODUCTS = [
   { id: 1, name: "인기검색어1" },
@@ -47,10 +55,10 @@ const POPULAR_PRODUCTS = [
 ];
 
 const PROGRESS_STEPS = [
-  { label: "검색 시작"},
-  { label: "결과 수집 중...", subLabel: "블로그, 카페, sns 등" },
-  { label: "데이터 분석 중..." },
-  { label: "결과 저장 중..." },
+  { label: "검색 시작", time: "0.0s"},
+  { label: "결과 수집 중...", subLabel: "블로그, 카페, sns 등", time: "" },
+  { label: "데이터 분석 중...", time: "" },
+  { label: "결과 저장 중...", time: "" },
 ];
 
 const VIRAL_LEVELS = [
@@ -73,7 +81,7 @@ const Header = ({ onLogoClick, isButton = false }: { onLogoClick?: () => void; i
       <Logo onClick={onLogoClick} className={`text-sm font-semibold tracking-widest uppercase text-[#1a1a2e] ${isButton ? "bg-transparent border-none cursor-pointer" : ""}`}>
         Viral Product Filtering
       </Logo>
-      <nav><a href="#" className="text-sm text-[#6B6B7B] hover:text-[#1a1a2e]">소개 및 사용법</a></nav>
+      
     </header>
   );
 };
@@ -172,20 +180,6 @@ const FilterModal = ({ viralRange, setViralRange, onClose, onApply }: {
   );
 };
 
-const ReasonModal = ({ onClose }: { onClose: () => void }) => (
-  <div className="fixed inset-0 bg-[rgba(26,26,46,0.3)] backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-    <div className="bg-white rounded-2xl p-6 w-full max-w-[400px] shadow-2xl border border-[#E8E8E4]" onClick={(e) => e.stopPropagation()}>
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold text-[#1a1a2e]">바이럴 지수 산정 근거</h3>
-        <button onClick={onClose} className="p-1.5 hover:bg-[#F0F0EC] rounded-full"><CloseIcon className="w-[18px] h-[18px] text-[#6B6B7B]" /></button>
-      </div>
-      <div className="p-10 bg-[#F8F8F6] rounded-xl text-center">
-        <p className="text-sm text-[#6B6B7B]">근거 데이터가 여기에 표시됩니다.</p>
-      </div>
-      <button onClick={onClose} className="w-full mt-5 py-3 bg-[#5B4FCF] text-white rounded-lg text-sm font-medium hover:bg-[#4A3FC0]">확인</button>
-    </div>
-  </div>
-);
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-2xl border border-[#E8E8E4] p-5 min-h-[200px]">
@@ -194,6 +188,45 @@ const SkeletonCard = () => (
     <div className="w-[50%] h-3 bg-[#F0F0EC] rounded animate-pulse" />
   </div>
 );
+
+const ResultCard = ({ item }: { item: any }) => {
+  const status = getViralStatus(item.viral_score);
+  const [showReason, setShowReason] = useState(false);
+  
+  return (
+    <div className="relative bg-white rounded-2xl border border-[#E8E8E4] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[200px]">
+      <button 
+        onClick={() => setShowReason(!showReason)} 
+        className="absolute top-3 left-3 w-6 h-6 bg-[#F8F8F6] hover:bg-[#E8E8E4] border border-[#E8E8E4] rounded-full flex items-center justify-center transition-colors z-10"
+        aria-label="바이럴 지수 산정 근거 보기"
+      >
+        <QuestionIcon className="w-3.5 h-3.5 text-[#6B6B7B]" />
+      </button>
+      
+      {showReason && (
+        <div className="absolute top-11 left-3 z-20 bg-white border border-[#E8E8E4] rounded-xl shadow-lg p-4 w-[calc(100%-24px)] max-w-[280px]">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-[#1a1a2e]">바이럴 지수 산정 근거</span>
+            <button onClick={() => setShowReason(false)} className="p-1 hover:bg-[#F0F0EC] rounded-full">
+              <CloseIcon className="w-3.5 h-3.5 text-[#6B6B7B]" />
+            </button>
+          </div>
+          <div className="p-3 bg-[#F8F8F6] rounded-lg">
+            <p className="text-xs text-[#6B6B7B] leading-relaxed">근거 데이터가 여기에 표시됩니다.</p>
+          </div>
+        </div>
+      )}
+      
+      <div>
+        <div className="flex justify-between items-center mb-3 pl-8">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: status.color, backgroundColor: `${status.color}15` }}>{status.label}</span>
+          <span className="text-sm font-bold" style={{ color: status.color }}>{item.viral_score}점</span>
+        </div>
+        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-base font-medium text-[#1a1a2e] hover:text-[#5B4FCF] line-clamp-2 leading-snug mb-4 block" dangerouslySetInnerHTML={{ __html: item.title }} />
+      </div>
+    </div>
+  );
+};
 
 const ProgressSidebar = ({ progress, searchQuery }: { progress: number; searchQuery: string }) => (
   <div className="w-[280px] bg-white rounded-xl border border-[#E8E8E4] p-5 h-fit shrink-0 hidden lg:block">
@@ -221,9 +254,25 @@ const ProgressSidebar = ({ progress, searchQuery }: { progress: number; searchQu
         <div className="w-5 h-5 border-2 border-[#E8E8E4] border-t-[#5B4FCF] rounded-full animate-spin" />
       </div>
     )}
-    <p className="text-xs text-[#6B6B7B] mt-4 leading-relaxed">실시간으로 결과를 수집하고 있습니다.<br />잠시만 기다려주세요.</p>
+    <p className="text-xs text-[#6B6B7B] mt-4 leading-relaxed">실��간으로 결과를 수집하고 있습니다.<br />잠시만 기다려주세요.</p>
   </div>
 );
+
+// 가짜 데이터
+const MOCK_RESULTS = [
+  {
+    title: "내돈내산 진짜 감동받은 가성비 <b>무선 이어폰</b> 추천 후기",
+    link: "https://blog.naver.com/test1",
+    viral_score: 15},
+  {
+    title: "최신형 <b>무선 이어폰</b> 솔직 담백한 사용기 (협찬품 아님)",
+    link: "https://blog.naver.com/test2",
+    viral_score: 45},
+  {
+    title: "[제품협찬] 음질 좋은 <b>무선 이어폰</b> 한 달 사용해 본 후기",
+    link: "https://blog.naver.com/test3",
+    viral_score: 95}
+];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -232,18 +281,37 @@ export default function Home() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
-  const [showReasonModal, setShowReasonModal] = useState<number | null>(null);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
+const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [appliedViralRange, setAppliedViralRange] = useState(10);
+  const [liveResults, setLiveResults] = useState<any[]>([]);
 
   const runProgress = () => {
     setSearchProgress(0);
+    setLiveResults([]);
+    let cardIndex = 0;
+  
     const interval = setInterval(() => {
       setSearchProgress((prev) => {
-        if (prev >= 3) { clearInterval(interval); return prev; }
+        
+        if (cardIndex < MOCK_RESULTS.length) {
+          const nextCard = MOCK_RESULTS[cardIndex];
+          setLiveResults((current) => [...current, nextCard]);
+          cardIndex++;
+        }
+        
+        if (prev >= 3) { 
+          clearInterval(interval); 
+          return prev; 
+        }
+      
+  
+        if (MOCK_RESULTS[prev]) {
+          setLiveResults((current) => [...current, MOCK_RESULTS[prev]]);
+        }
+      
         return prev + 1;
       });
-    }, 800);
+    }, 1200); // 1.2초마다 한 단계씩 진행되면서 새로운 카드가 툭툭 뜸
   };
 
   const handleSearch = () => {
@@ -289,15 +357,25 @@ export default function Home() {
           )}
         </div>
 
-        <div className="flex p-6 md:px-16 gap-6 flex-1">
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[1, 2, 3, 4, 5, 6].map((idx) => <SkeletonCard key={idx} />)}
-          </div>
+          <div className="flex p-6 md:px-16 gap-6 flex-1">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {liveResults.map((item, idx) => (
+<ResultCard 
+                  key={idx} 
+                  item={item} 
+                />
+              ))}
+
+              {searchProgress < 3 && (
+                [1, 2, 3].map((idx) => <SkeletonCard key={idx} />)
+              )}
+    
+            </div>
+  
           <ProgressSidebar progress={searchProgress} searchQuery={searchQuery} />
         </div>
 
-        {showFilter && <FilterModal viralRange={viralRange} setViralRange={setViralRange} onClose={() => setShowFilter(false)} onApply={handleApplyFilter} />}
-        {showReasonModal && <ReasonModal onClose={() => setShowReasonModal(null)} />}
+{showFilter && <FilterModal viralRange={viralRange} setViralRange={setViralRange} onClose={() => setShowFilter(false)} onApply={handleApplyFilter} />}
         <Footer />
       </div>
     );
