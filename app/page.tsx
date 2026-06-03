@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // 아이콘 컴포넌트
 const SearchIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -55,7 +55,7 @@ const POPULAR_PRODUCTS = [
 ];
 
 const PROGRESS_STEPS = [
-  { label: "검색 시작", time: "0.0s"},
+  { label: "검색 시작", time: "0.0s" },
   { label: "결과 수집 중...", subLabel: "블로그, 카페, sns 등", time: "" },
   { label: "데이터 분석 중...", time: "" },
   { label: "결과 저장 중...", time: "" },
@@ -81,7 +81,7 @@ const Header = ({ onLogoClick, isButton = false }: { onLogoClick?: () => void; i
       <Logo onClick={onLogoClick} className={`text-sm font-semibold tracking-widest uppercase text-[#1a1a2e] ${isButton ? "bg-transparent border-none cursor-pointer" : ""}`}>
         Viral Product Filtering
       </Logo>
-      
+
     </header>
   );
 };
@@ -147,9 +147,8 @@ const FilterModal = ({ viralRange, setViralRange, onClose, onApply }: {
                 <button
                   key={value}
                   onClick={() => setViralRange(value)}
-                  className={`py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    isSelected ? "text-white shadow-md" : "bg-[#F8F8F6] text-[#6B6B7B] hover:bg-[#F0F0EC]"
-                  }`}
+                  className={`py-2.5 rounded-lg text-sm font-medium transition-all ${isSelected ? "text-white shadow-md" : "bg-[#F8F8F6] text-[#6B6B7B] hover:bg-[#F0F0EC]"
+                    }`}
                   style={isSelected ? { backgroundColor: status.color } : undefined}
                 >
                   {value}
@@ -192,17 +191,17 @@ const SkeletonCard = () => (
 const ResultCard = ({ item }: { item: any }) => {
   const status = getViralStatus(item.viral_score);
   const [showReason, setShowReason] = useState(false);
-  
+
   return (
     <div className="relative bg-white rounded-2xl border border-[#E8E8E4] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[200px]">
-      <button 
-        onClick={() => setShowReason(!showReason)} 
+      <button
+        onClick={() => setShowReason(!showReason)}
         className="absolute top-3 left-3 w-6 h-6 bg-[#F8F8F6] hover:bg-[#E8E8E4] border border-[#E8E8E4] rounded-full flex items-center justify-center transition-colors z-10"
         aria-label="바이럴 지수 산정 근거 보기"
       >
         <QuestionIcon className="w-3.5 h-3.5 text-[#6B6B7B]" />
       </button>
-      
+
       {showReason && (
         <div className="absolute top-11 left-3 z-20 bg-white border border-[#E8E8E4] rounded-xl shadow-lg p-4 w-[calc(100%-24px)] max-w-[280px]">
           <div className="flex items-center justify-between mb-3">
@@ -212,11 +211,11 @@ const ResultCard = ({ item }: { item: any }) => {
             </button>
           </div>
           <div className="p-3 bg-[#F8F8F6] rounded-lg">
-            <p className="text-xs text-[#6B6B7B] leading-relaxed">근거 데이터가 여기에 표시됩니다.</p>
+            <p className="text-xs text-[#6B6B7B] leading-relaxed">{item.reason || "근거 데이터가 여기에 표시됩니다."}</p>
           </div>
         </div>
       )}
-      
+
       <div>
         <div className="flex justify-between items-center mb-3 pl-8">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: status.color, backgroundColor: `${status.color}15` }}>{status.label}</span>
@@ -254,7 +253,7 @@ const ProgressSidebar = ({ progress, searchQuery }: { progress: number; searchQu
         <div className="w-5 h-5 border-2 border-[#E8E8E4] border-t-[#5B4FCF] rounded-full animate-spin" />
       </div>
     )}
-    <p className="text-xs text-[#6B6B7B] mt-4 leading-relaxed">실��간으로 결과를 수집하고 있습니다.<br />잠시만 기다려주세요.</p>
+    <p className="text-xs text-[#6B6B7B] mt-4 leading-relaxed">실시간으로 결과를 수집하고 있습니다.<br />잠시만 기다려주세요.</p>
   </div>
 );
 
@@ -263,15 +262,18 @@ const MOCK_RESULTS = [
   {
     title: "내돈내산 진짜 감동받은 가성비 <b>무선 이어폰</b> 추천 후기",
     link: "https://blog.naver.com/test1",
-    viral_score: 15},
+    viral_score: 15
+  },
   {
     title: "최신형 <b>무선 이어폰</b> 솔직 담백한 사용기 (협찬품 아님)",
     link: "https://blog.naver.com/test2",
-    viral_score: 45},
+    viral_score: 45
+  },
   {
     title: "[제품협찬] 음질 좋은 <b>무선 이어폰</b> 한 달 사용해 본 후기",
     link: "https://blog.naver.com/test3",
-    viral_score: 95}
+    viral_score: 95
+  }
 ];
 
 export default function Home() {
@@ -281,56 +283,82 @@ export default function Home() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
-const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [appliedViralRange, setAppliedViralRange] = useState(10);
   const [liveResults, setLiveResults] = useState<any[]>([]);
 
-  const runProgress = () => {
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
+
+  const runProgress = (query: string, range: number) => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
     setSearchProgress(0);
     setLiveResults([]);
-    let cardIndex = 0;
-  
-    const interval = setInterval(() => {
-      setSearchProgress((prev) => {
-        
-        if (cardIndex < MOCK_RESULTS.length) {
-          const nextCard = MOCK_RESULTS[cardIndex];
-          setLiveResults((current) => [...current, nextCard]);
-          cardIndex++;
+
+    const url = `http://localhost:8080/api/v1/search/stream?query=${encodeURIComponent(query)}&viralRange=${range}`;
+    const es = new EventSource(url);
+    eventSourceRef.current = es;
+
+    es.addEventListener("progress", (event: any) => {
+      const data = JSON.parse(event.data);
+      setSearchProgress(data.step);
+      if (data.step === 3) {
+        es.close();
+      }
+    });
+
+    es.addEventListener("card", (event: any) => {
+      const card = JSON.parse(event.data);
+      setLiveResults((current) => [
+        ...current,
+        {
+          title: card.title,
+          link: card.link,
+          viral_score: card.viralScore,
+          reason: card.reason
         }
-        
-        if (prev >= 3) { 
-          clearInterval(interval); 
-          return prev; 
-        }
-      
-  
-        if (MOCK_RESULTS[prev]) {
-          setLiveResults((current) => [...current, MOCK_RESULTS[prev]]);
-        }
-      
-        return prev + 1;
-      });
-    }, 1200); // 1.2초마다 한 단계씩 진행되면서 새로운 카드가 툭툭 뜸
+      ]);
+    });
+
+    es.onerror = (err) => {
+      // 스트림이 정상 종료되거나 끊겼을 때 발생하는 자연스러운 이벤트입니다.
+      console.log("SSE stream closed or completed");
+      es.close();
+    };
   };
 
-  const handleSearch = () => {
-    if (!searchQuery.trim()) return;
+  const handleSearch = (query?: string | any) => {
+    const finalQuery = (typeof query === "string") ? query : searchQuery;
+    if (!finalQuery.trim()) return;
     setIsSearching(true);
     setIsFilterApplied(false);
-    runProgress();
+    runProgress(finalQuery, 100);
   };
 
   const handleApplyFilter = () => {
     setShowFilter(false);
     setIsFilterApplied(true);
     setAppliedViralRange(viralRange);
-    runProgress();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter") handleSearch(); };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSearch(searchQuery);
+  };
 
   const handleBackToHome = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
     setIsSearching(false);
     setSearchQuery("");
     setSearchProgress(0);
@@ -346,36 +374,38 @@ const [isFilterApplied, setIsFilterApplied] = useState(false);
 
         <div className="flex flex-col items-center p-6 border-b border-[#E8E8E4] bg-white gap-5">
           <SearchBar value={searchQuery} onChange={setSearchQuery} onKeyDown={handleKeyDown} onFilter={() => setShowFilter(true)} onSearch={handleSearch} size="sm" />
-          
+
           {isFilterApplied && (
             <div className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium" style={{ backgroundColor: `${appliedStatus.color}15`, color: appliedStatus.color }}>
               <span>바이럴 지수 {appliedViralRange} 이하 필터링 적용됨</span>
-              <button onClick={() => { setIsFilterApplied(false); handleSearch(); }} className="p-0.5 hover:opacity-70">
+              <button onClick={() => setIsFilterApplied(false)} className="p-0.5 hover:opacity-70">
                 <CloseIcon className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
         </div>
 
-          <div className="flex p-6 md:px-16 gap-6 flex-1">
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {liveResults.map((item, idx) => (
-<ResultCard 
-                  key={idx} 
-                  item={item} 
+        <div className="flex p-6 md:px-16 gap-6 flex-1">
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {liveResults
+              .filter((item) => !isFilterApplied || item.viral_score <= appliedViralRange)
+              .map((item, idx) => (
+                <ResultCard
+                  key={idx}
+                  item={item}
                 />
               ))}
 
-              {searchProgress < 3 && (
-                [1, 2, 3].map((idx) => <SkeletonCard key={idx} />)
-              )}
-    
-            </div>
-  
+            {searchProgress < 3 && (
+              [1, 2, 3].map((idx) => <SkeletonCard key={idx} />)
+            )}
+
+          </div>
+
           <ProgressSidebar progress={searchProgress} searchQuery={searchQuery} />
         </div>
 
-{showFilter && <FilterModal viralRange={viralRange} setViralRange={setViralRange} onClose={() => setShowFilter(false)} onApply={handleApplyFilter} />}
+        {showFilter && <FilterModal viralRange={viralRange} setViralRange={setViralRange} onClose={() => setShowFilter(false)} onApply={handleApplyFilter} />}
         <Footer />
       </div>
     );
@@ -416,7 +446,7 @@ const [isFilterApplied, setIsFilterApplied] = useState(false);
                 className="flex flex-col items-center cursor-pointer group"
                 onMouseEnter={() => setHoveredCard(product.id)}
                 onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => { setSearchQuery(product.name); handleSearch(); }}
+                onClick={() => { setSearchQuery(product.name); handleSearch(product.name); }}
               >
                 <div className={`w-full aspect-square border rounded-3xl bg-white flex items-center justify-center mb-3 transition-all duration-300
                   ${hoveredCard === product.id ? "border-[#5B4FCF] -translate-y-2 shadow-xl" : "border-[#E8E8E4] shadow-sm"}`}>
