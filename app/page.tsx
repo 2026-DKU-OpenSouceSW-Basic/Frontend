@@ -37,28 +37,20 @@ const TrendIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
-const QuestionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+const InfoIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" />
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-    <path d="M12 17h.01" />
+    <path d="M12 16v-4" />
+    <path d="M12 8h.01" />
   </svg>
 );
 
 // 상수
-const POPULAR_PRODUCTS = [
-  { id: 1, name: "인기검색어1" },
-  { id: 2, name: "인기검색어2" },
-  { id: 3, name: "인기검색어3" },
-  { id: 4, name: "인기검색어4" },
-  { id: 5, name: "인기검색어5" },
-];
-
 const PROGRESS_STEPS = [
-  { label: "검색 시작", time: "0.0s" },
-  { label: "결과 수집 중...", subLabel: "블로그, 카페, sns 등", time: "" },
-  { label: "데이터 분석 중...", time: "" },
-  { label: "결과 저장 중...", time: "" },
+  { label: "검색 시작" },
+  { label: "결과 수집 중..." },
+  { label: "데이터 분석 중..." },
+  { label: "결과 저장 중..." },
 ];
 
 const VIRAL_LEVELS = [
@@ -181,10 +173,13 @@ const FilterModal = ({ viralRange, setViralRange, onClose, onApply }: {
 
 
 const SkeletonCard = () => (
-  <div className="bg-white rounded-2xl border border-[#E8E8E4] p-5 min-h-[200px]">
-    <div className="w-full h-[120px] bg-[#F0F0EC] rounded-xl mb-4 animate-pulse" />
-    <div className="w-[70%] h-4 bg-[#F0F0EC] rounded mb-2 animate-pulse" />
-    <div className="w-[50%] h-3 bg-[#F0F0EC] rounded animate-pulse" />
+  <div className="bg-white rounded-2xl border border-[#E8E8E4] p-4 min-h-[200px]">
+    <div className="w-full h-[130px] bg-[#F0F0EC] rounded-xl mb-3 animate-pulse" />
+    <div className="flex justify-between mb-2">
+      <div className="w-12 h-5 bg-[#F0F0EC] rounded-full animate-pulse" />
+      <div className="w-8 h-5 bg-[#F0F0EC] rounded animate-pulse" />
+    </div>
+    <div className="w-[80%] h-4 bg-[#F0F0EC] rounded animate-pulse" />
   </div>
 );
 
@@ -193,36 +188,62 @@ const ResultCard = ({ item }: { item: any }) => {
   const [showReason, setShowReason] = useState(false);
 
   return (
-    <div className="relative bg-white rounded-2xl border border-[#E8E8E4] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between min-h-[200px]">
-      <button
-        onClick={() => setShowReason(!showReason)}
-        className="absolute top-3 left-3 w-6 h-6 bg-[#F8F8F6] hover:bg-[#E8E8E4] border border-[#E8E8E4] rounded-full flex items-center justify-center transition-colors z-10"
-        aria-label="바이럴 지수 산정 근거 보기"
-      >
-        <QuestionIcon className="w-3.5 h-3.5 text-[#6B6B7B]" />
-      </button>
-
-      {showReason && (
-        <div className="absolute top-11 left-3 z-20 bg-white border border-[#E8E8E4] rounded-xl shadow-lg p-4 w-[calc(100%-24px)] max-w-[280px]">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-[#1a1a2e]">바이럴 지수 산정 근거</span>
-            <button onClick={() => setShowReason(false)} className="p-1 hover:bg-[#F0F0EC] rounded-full">
-              <CloseIcon className="w-3.5 h-3.5 text-[#6B6B7B]" />
-            </button>
+    <div className="bg-white rounded-2xl border border-[#E8E8E4] p-4 shadow-sm hover:shadow-md transition-all flex flex-col min-h-[210px]">
+      {/* 썸네일 */}
+      <div className="w-full h-[130px] overflow-hidden rounded-xl mb-3 border border-[#E8E8E4] bg-[#F8F8F6]">
+        {item.thumbnail ? (
+          <img
+            src={item.thumbnail}
+            alt={item.title}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-[#A0A0A0] text-xs gap-1 bg-[#FAFAF8]">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            <span>이미지 없음</span>
           </div>
-          <div className="p-3 bg-[#F8F8F6] rounded-lg">
-            <p className="text-xs text-[#6B6B7B] leading-relaxed">{item.reason || "근거 데이터가 여기에 표시됩니다."}</p>
-          </div>
-        </div>
-      )}
-
-      <div>
-        <div className="flex justify-between items-center mb-3 pl-8">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: status.color, backgroundColor: `${status.color}15` }}>{status.label}</span>
-          <span className="text-sm font-bold" style={{ color: status.color }}>{item.viral_score}점</span>
-        </div>
-        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-base font-medium text-[#1a1a2e] hover:text-[#5B4FCF] line-clamp-2 leading-snug mb-4 block" dangerouslySetInnerHTML={{ __html: item.title }} />
+        )}
       </div>
+
+      {/* 상태 배지 + 점수 + 근거(ⓘ) */}
+      <div className="relative flex justify-between items-center mb-2">
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: status.color, backgroundColor: `${status.color}15` }}>{status.label}</span>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-[15px] font-bold" style={{ color: status.color }}>{item.viral_score}점</span>
+          <button
+            onClick={() => setShowReason(!showReason)}
+            className="text-[#C0C0C8] hover:text-[#5B4FCF] transition-colors"
+            aria-label="바이럴 지수 산정 근거 보기"
+          >
+            <InfoIcon className="w-[15px] h-[15px]" />
+          </button>
+        </div>
+
+        {showReason && (
+          <div className="absolute top-9 right-0 z-20 bg-white border border-[#E8E8E4] rounded-xl shadow-lg p-3 w-[240px]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-[#1a1a2e]">바이럴 지수 산정 근거</span>
+              <button onClick={() => setShowReason(false)} className="p-1 hover:bg-[#F0F0EC] rounded-full">
+                <CloseIcon className="w-3.5 h-3.5 text-[#6B6B7B]" />
+              </button>
+            </div>
+            <p className="text-xs text-[#6B6B7B] leading-relaxed whitespace-pre-line p-2.5 bg-[#F8F8F6] rounded-lg">{item.reason || "근거 데이터가 여기에 표시됩니다."}</p>
+          </div>
+        )}
+      </div>
+
+      {/* 제목 — 2줄 고정 높이로 카드 정렬 */}
+      <a
+        href={item.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[15px] font-semibold text-[#1a1a2e] hover:text-[#5B4FCF] leading-snug tracking-tight line-clamp-2 min-h-[2.7em] transition-colors"
+        dangerouslySetInnerHTML={{ __html: item.title }}
+      />
     </div>
   );
 };
@@ -241,9 +262,7 @@ const ProgressSidebar = ({ progress, searchQuery }: { progress: number; searchQu
               <span className={`text-[13px] ${idx <= progress ? "text-[#1a1a2e] font-medium" : "text-[#6B6B7B]"}`}>
                 {idx === 0 ? `${searchQuery} ${step.label}` : step.label}
               </span>
-              {step.time && <span className="text-[11px] text-[#6B6B7B]">{step.time}</span>}
             </div>
-            {step.subLabel && <span className="text-[11px] text-[#6B6B7B]">{step.subLabel}</span>}
           </div>
         </div>
       ))}
@@ -278,9 +297,10 @@ const MOCK_RESULTS = [
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeQuery, setActiveQuery] = useState("");   // 실제 검색 실행된 검색어(진행상황 표시 고정용)
   const [showFilter, setShowFilter] = useState(false);
   const [viralRange, setViralRange] = useState(10);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [popularKeywords, setPopularKeywords] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -289,7 +309,16 @@ export default function Home() {
 
   const eventSourceRef = useRef<EventSource | null>(null);
 
+  // DB의 검색 빈도 기준 인기 검색어 조회
+  const fetchPopular = () => {
+    fetch("http://localhost:8080/api/v1/search/popular?limit=10")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setPopularKeywords(Array.isArray(data) ? data : []))
+      .catch(() => setPopularKeywords([]));
+  };
+
   useEffect(() => {
+    fetchPopular();
     return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
@@ -325,7 +354,8 @@ export default function Home() {
           title: card.title,
           link: card.link,
           viral_score: card.viralScore,
-          reason: card.reason
+          reason: card.reason,
+          thumbnail: card.thumbnail
         }
       ]);
     });
@@ -340,6 +370,7 @@ export default function Home() {
   const handleSearch = (query?: string | any) => {
     const finalQuery = (typeof query === "string") ? query : searchQuery;
     if (!finalQuery.trim()) return;
+    setActiveQuery(finalQuery);   // 진행상황에 고정될 검색어
     setIsSearching(true);
     setIsFilterApplied(false);
     runProgress(finalQuery, 100);
@@ -361,8 +392,10 @@ export default function Home() {
     }
     setIsSearching(false);
     setSearchQuery("");
+    setActiveQuery("");
     setSearchProgress(0);
     setIsFilterApplied(false);
+    fetchPopular();   // 최신 검색 빈도 반영
   };
 
   // 검색 결과 화면
@@ -402,7 +435,7 @@ export default function Home() {
 
           </div>
 
-          <ProgressSidebar progress={searchProgress} searchQuery={searchQuery} />
+          <ProgressSidebar progress={searchProgress} searchQuery={activeQuery} />
         </div>
 
         {showFilter && <FilterModal viralRange={viralRange} setViralRange={setViralRange} onClose={() => setShowFilter(false)} onApply={handleApplyFilter} />}
@@ -428,36 +461,39 @@ export default function Home() {
           <SearchBar value={searchQuery} onChange={setSearchQuery} onKeyDown={handleKeyDown} onFilter={() => setShowFilter(true)} onSearch={handleSearch} />
         </div>
 
-        <section className="w-full max-w-[900px]">
-          <div className="flex items-center gap-4 mb-10">
+        <section className="w-full max-w-[720px]">
+          <div className="flex items-center gap-4 mb-8">
             <div className="w-11 h-11 rounded-full bg-[#5B4FCF15] flex items-center justify-center">
               <TrendIcon className="w-5 h-5 text-[#5B4FCF]" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#1a1a2e]">인기 검색 결과</h2>
-              <p className="text-sm text-[#6B6B7B] mt-1">지금 가장 많이 검색되고 있는 제품을 즐겨보세요</p>
+              <h2 className="text-lg font-semibold text-[#1a1a2e]">인기 검색어</h2>
+              <p className="text-sm text-[#6B6B7B] mt-1">지금 가장 많이 검색된 키워드예요</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {POPULAR_PRODUCTS.map((product) => (
-              <div
-                key={product.id}
-                className="flex flex-col items-center cursor-pointer group"
-                onMouseEnter={() => setHoveredCard(product.id)}
-                onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => { setSearchQuery(product.name); handleSearch(product.name); }}
-              >
-                <div className={`w-full aspect-square border rounded-3xl bg-white flex items-center justify-center mb-3 transition-all duration-300
-                  ${hoveredCard === product.id ? "border-[#5B4FCF] -translate-y-2 shadow-xl" : "border-[#E8E8E4] shadow-sm"}`}>
-                  <div className="w-14 h-14 rounded-2xl bg-[#F0F0EC]" />
-                </div>
-                <span className={`text-sm font-medium transition-colors ${hoveredCard === product.id ? "text-[#5B4FCF]" : "text-[#1a1a2e]"}`}>
-                  {product.name}
-                </span>
-              </div>
-            ))}
-          </div>
+          {popularKeywords.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 bg-white border border-[#E8E8E4] rounded-2xl p-3">
+              {popularKeywords.slice(0, 10).map((keyword, idx) => (
+                <button
+                  key={keyword}
+                  onClick={() => { setSearchQuery(keyword); handleSearch(keyword); }}
+                  className="flex items-center gap-4 py-3 px-3 rounded-xl hover:bg-[#F8F8F6] transition-colors text-left group"
+                >
+                  <span className={`w-5 text-center text-sm font-bold shrink-0 ${idx < 3 ? "text-[#5B4FCF]" : "text-[#B0B0B8]"}`}>
+                    {idx + 1}
+                  </span>
+                  <span className="text-[15px] text-[#1a1a2e] group-hover:text-[#5B4FCF] transition-colors truncate">
+                    {keyword}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-14 text-sm text-[#6B6B7B] bg-white border border-[#E8E8E4] rounded-2xl">
+              아직 인기 검색어가 없어요. 첫 검색을 시작해보세요!
+            </div>
+          )}
         </section>
       </main>
 
